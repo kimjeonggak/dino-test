@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>🦖 공룡 환생 MBTI 테스트</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    #card {
+      border: 2px solid #333;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    h2 { margin-top: 0; }
+    .opt {
+      display: block;
+      margin: 12px 0;
+      padding: 12px;
+      border: 1px solid #888;
+      border-radius: 12px;
+      cursor: pointer;
+      background: #fff;
+      text-align: left;
+    }
+    .opt:hover { background: #f0f0f0; }
+    #progress {
+      height: 8px;
+      background: #eee;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    #bar {
+      height: 100%;
+      background: #4caf50;
+      width: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🦖 공룡 환생 MBTI</h1>
+  <div id="progress"><div id="bar"></div></div>
+  <div id="card"></div>
+
+  <script>
+    // 1) 질문 데이터 (총 16문항; 예시로 앞/뒤만 넣었고, 실제 16개로 채워주세요)
+    const QUESTIONS = [
+      {
+        q: "눈을 떠보니 백악기 한복판! 첫 반응은?",
+        opts: [
+          { txt: "이거 꿈이야!",      val: "E" },
+          { txt: "헐, 진짜 공룡이라니!", val: "E" },
+          { txt: "여기가 백악기라고?!",  val: "I" },
+          { txt: "타임슬립 성공?!",     val: "I" }
+        ]
+      },
+      {
+        q: "가까운 바위 뒤에 다른 사람이! 어떻게 할까?",
+        opts: [
+          { txt: "먼저 다가가 인사",      val: "E" },
+          { txt: "질문하며 정보 수집",    val: "E" },
+          { txt: "멀찍이 관찰",          val: "I" },
+          { txt: "숨죽이고 지켜봄",      val: "I" }
+        ]
+      },
+      // … 여기에 14문항 더 추가 (총 16개) …
+      {
+        q: "귀환 후 가장 먼저 할 일은?",
+        opts: [
+          { txt: "휴식부터!",       val: "P" },
+          { txt: "힐링 타임",       val: "P" },
+          { txt: "밀린 업무 처리",  val: "J" },
+          { txt: "모험 기록 정리",  val: "J" }
+        ]
+      }
+    ];
+
+    // 2) MBTI코드 → 공룡 매핑
+    const DINO = {
+      ISTJ:{name:"안킬로사우루스",desc:"책임감 있고 안정적인 방어형"},
+      ESTJ:{name:"티라노사우루스",desc:"권위 있고 체계적인 지도자형"},
+      ISFJ:{name:"트리케라톱스",desc:"헌신적이고 온순한 수호자형"},
+      ESFJ:{name:"마이아사우라",desc:"다정하고 이타적인 돌봄형"},
+      ISTP:{name:"알로사우루스",desc:"냉철·독립 사냥꾼형"},
+      ESTP:{name:"카르노타우루스",desc:"저돌적·즉흥 돌격형"},
+      ISFP:{name:"스티라코사우루스",desc:"온화·예술 자유영혼형"},
+      ESFP:{name:"파키케팔로사우루스",desc:"열정·자유 연예인형"},
+      INTJ:{name:"벨로키랍토르",desc:"영리·계획 전략가형"},
+      INTP:{name:"트로오돈",desc:"호기심·분석 탐구자형"},
+      INFJ:{name:"스테고사우루스",desc:"조용·헌신 이상주의자형"},
+      INFP:{name:"브라키오사우루스",desc:"온화·상상 몽상가형"},
+      ENTJ:{name:"스피노사우루스",desc:"야심·주도 지배자형"},
+      ENTP:{name:"딜로포사우루스",desc:"논쟁·장난 장난꾸러기형"},
+      ENFJ:{name:"파라사우롤로푸스",desc:"친화·리더 소통가형"},
+      ENFP:{name:"이구아노돈",desc:"모험·낙천 탐험가형"}
+    };
+
+    // 3) 상태 초기화
+    let idx = 0;
+    const scores = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+    const card = document.getElementById("card");
+    const bar = document.getElementById("bar");
+
+    // 4) 질문 렌더링
+    function renderQuestion() {
+      const {q, opts} = QUESTIONS[idx];
+      bar.style.width = (idx / QUESTIONS.length * 100) + "%";
+      card.innerHTML = `<h2>${idx+1}. ${q}</h2>` +
+        opts.map(o =>
+          `<button class="opt" onclick="choose('${o.val}')">${o.txt}</button>`
+        ).join("");
+    }
+
+    // 5) 선택했을 때
+    function choose(val) {
+      scores[val]++;
+      idx++;
+      if (idx < QUESTIONS.length) {
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    // 6) 결과 표시
+    function showResult() {
+      bar.style.width = "100%";
+      const type =
+        (scores.E>=scores.I?"E":"I") +
+        (scores.S>=scores.N?"S":"N") +
+        (scores.T>=scores.F?"T":"F") +
+        (scores.J>=scores.P?"J":"P");
+      const d = DINO[type];
+      const others = Object.entries(DINO)
+        .filter(([k]) => k !== type)
+        .map(([k,v]) => `<li>${k} – ${v.name}</li>`)
+        .join("");
+      card.innerHTML = `
+        <h2>당신의 결과는 <strong>${type}</strong>!</h2>
+        <p>🦖 <strong>${d.name}</strong> – ${d.desc}</p>
+        <h3>다른 공룡 구경하기</h3>
+        <ul>${others}</ul>
+        <button class="opt" onclick="location.reload()">다시하기</button>
+      `;
+    }
+
+    // 7) 시작!
+    renderQuestion();
+  </script>
+</body>
+</html>
